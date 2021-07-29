@@ -7,6 +7,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Schema } from 'mongoose';
 import { Model } from 'mongoose';
 import { UserForCreate } from './interaces/user.model';
+import { HttpException } from '@nestjs/common';
 
 @Injectable()
 export class UserService {
@@ -20,12 +21,16 @@ export class UserService {
     return await this.userModel.find();
   }
 
-  async findOne(id: string): Promise<UserForCreate> {
-    return await this.userModel.findById({_id: id});
+  async findOne(id: string): Promise<UserForCreate> {    
+    const user = await this.userModel.findById({ _id: id });    
+    if (!user) {
+      throw new HttpException('Not found user', 404);
+    }
+    return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    return await this.userModel.findOneAndUpdate({_id: id});
   }
 
   remove(id: number) {
